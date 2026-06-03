@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ import time
 import os
 import json
 import httpx
+import asyncio
 
 app = FastAPI(title="Local AI Guest Gateway")
 
@@ -149,7 +150,7 @@ async def reject_request(session_id: str):
 
 
 # ==========================================
-# Proxy & Billing Module
+# Proxy & Billing Module (Private Chat)
 # ==========================================
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
@@ -197,6 +198,112 @@ async def chat_proxy(request: Request, chat_req: ChatRequest):
                 yield f"{error_msg}\n".encode("utf-8")
 
     return StreamingResponse(generate(), media_type="application/x-ndjson")
+
+
+# ==========================================
+# WebSocket: Multiplayer Lounge
+# ==========================================
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                pass
+
+manager = ConnectionManager()
+group_chat_history = []
+
+@app.websocket("/ws/group_chat/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    if session_id not in sessions or sessions[session_id].status != "approved":
+        await websocket.close(code=1008)
+        return
+    
+    guest_name = sessions[session_id].guest_name
+    await manager.connect(websocket)
+    
+    # Broadcast join message
+    await manager.broadcast({"type": "system", "content": f"{guest_name} joined the lounge."})
+    
+    # Send history to the new user (wrapped in a task to not block)
+    for msg in group_chat_history:
+        await websocket.send_json(msg)
+        
+    try:
+        while True:
+            data = await websocket.receive_text()
+            
+            # Broadcast user message
+            msg_obj = {"type": "user", "name": guest_name, "content": data}
+            group_chat_history.append(msg_obj)
+            await manager.broadcast(msg_obj)
+            
+            # AI Mention trigger
+            if "@AI" in data:
+                ai_messages = [
+                    {"role": "system", "content": "You are participating in a group chat. Keep responses concise and natural. Address the users by name if possible."}
+                ]
+                # Send the last 15 messages as context
+                for m in group_chat_history[-15:]:
+                    if m["type"] == "user":
+                        ai_messages.append({"role": "user", "content": f"[{m['name']}] {m['content']}"})
+                    elif m["type"] == "ai":
+                        ai_messages.append({"role": "assistant", "content": m["content"]})
+                
+                payload = {
+                    "model": "llama3", # We can default to llama3, or let the first caller set it
+                    "messages": ai_messages,
+                    "stream": True
+                }
+                
+                # Start AI generation without blocking the listener loop
+                asyncio.create_task(process_ai_response(payload))
+                
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast({"type": "system", "content": f"{guest_name} left the lounge."})
+
+async def process_ai_response(payload):
+    await manager.broadcast({"type": "ai_start", "name": "AI"})
+    full_response = ""
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            async with client.stream("POST", "http://localhost:11434/api/chat", json=payload, timeout=None) as response:
+                if response.status_code == 200:
+                    async for chunk in response.aiter_bytes():
+                        chunk_str = chunk.decode("utf-8")
+                        lines = chunk_str.split("\n")
+                        for line in lines:
+                            if line.strip():
+                                try:
+                                    parsed = json.loads(line)
+                                    if "message" in parsed and "content" in parsed["message"]:
+                                        content = parsed["message"]["content"]
+                                        full_response += content
+                                        await manager.broadcast({"type": "ai_chunk", "content": content})
+                                except Exception:
+                                    pass
+                else:
+                    await manager.broadcast({"type": "ai_chunk", "content": "[API Error]"})
+    except Exception as e:
+        await manager.broadcast({"type": "ai_chunk", "content": f"[Connection Error: {e}]"})
+        
+    await manager.broadcast({"type": "ai_end"})
+    group_chat_history.append({"type": "ai", "name": "AI", "content": full_response})
 
 if __name__ == "__main__":
     import uvicorn

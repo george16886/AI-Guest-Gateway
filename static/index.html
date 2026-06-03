@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local AI Guest Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js for Markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -13,14 +12,11 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         glass: 'rgba(255, 255, 255, 0.05)',
                         glassBorder: 'rgba(255, 255, 255, 0.1)',
                         accent: '#6366f1',
-                        accentHover: '#4f46e5',
                     }
                 }
             }
@@ -33,105 +29,56 @@
             color: #e2e8f0;
             min-height: 100vh;
         }
-        
         .glass-panel {
             background: var(--tw-colors-glass);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--tw-colors-glassBorder);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
-
         .dot-flashing {
-            position: relative;
-            width: 8px;
-            height: 8px;
-            border-radius: 5px;
-            background-color: #e2e8f0;
-            color: #e2e8f0;
-            animation: dot-flashing 1s infinite linear alternate;
-            animation-delay: 0.5s;
+            position: relative; width: 8px; height: 8px; border-radius: 5px;
+            background-color: #e2e8f0; color: #e2e8f0;
+            animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s;
         }
         .dot-flashing::before, .dot-flashing::after {
-            content: '';
-            display: inline-block;
-            position: absolute;
-            top: 0;
+            content: ''; display: inline-block; position: absolute; top: 0;
         }
         .dot-flashing::before {
-            left: -12px;
-            width: 8px;
-            height: 8px;
-            border-radius: 5px;
-            background-color: #e2e8f0;
-            color: #e2e8f0;
-            animation: dot-flashing 1s infinite alternate;
-            animation-delay: 0s;
+            left: -12px; width: 8px; height: 8px; border-radius: 5px;
+            background-color: #e2e8f0; color: #e2e8f0;
+            animation: dot-flashing 1s infinite alternate; animation-delay: 0s;
         }
         .dot-flashing::after {
-            left: 12px;
-            width: 8px;
-            height: 8px;
-            border-radius: 5px;
-            background-color: #e2e8f0;
-            color: #e2e8f0;
-            animation: dot-flashing 1s infinite alternate;
-            animation-delay: 1s;
+            left: 12px; width: 8px; height: 8px; border-radius: 5px;
+            background-color: #e2e8f0; color: #e2e8f0;
+            animation: dot-flashing 1s infinite alternate; animation-delay: 1s;
         }
-
         @keyframes dot-flashing {
             0% { background-color: #e2e8f0; }
             50%, 100% { background-color: rgba(226, 232, 240, 0.2); }
         }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Markdown Styles */
         .markdown-body p { margin-bottom: 0.5em; }
-        .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body pre {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-top: 0.5em;
-            margin-bottom: 0.5em;
+            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;
+            overflow-x: auto; margin-top: 0.5em; margin-bottom: 0.5em;
             border: 1px solid rgba(255,255,255,0.1);
         }
         .markdown-body code {
-            font-family: monospace;
-            background: rgba(0,0,0,0.2);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 0.9em;
+            font-family: monospace; background: rgba(0,0,0,0.2);
+            padding: 2px 4px; border-radius: 4px; font-size: 0.9em;
         }
-        .markdown-body pre code {
-            background: transparent;
-            padding: 0;
-        }
-        .markdown-body ul { list-style-type: disc; padding-left: 20px; margin-bottom: 0.5em; }
-        .markdown-body ol { list-style-type: decimal; padding-left: 20px; margin-bottom: 0.5em; }
-        .markdown-body strong { font-weight: bold; color: #fff; }
+        .markdown-body pre code { background: transparent; padding: 0; }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
 
-    <!-- Container -->
     <div class="w-full max-w-4xl h-[85vh] glass-panel rounded-2xl flex flex-col relative overflow-hidden transition-all duration-500">
         
-        <!-- Header -->
         <header class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
@@ -143,7 +90,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <button id="btn-export" onclick="exportChat()" class="hidden px-3 py-1 text-xs font-medium rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/40 border border-indigo-500/30 transition-colors">
-                    Export Chat
+                    Export Private Chat
                 </button>
                 <div id="status-badge" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 border border-slate-700 text-slate-300 hidden">
                     Disconnected
@@ -152,18 +99,17 @@
         </header>
 
         <!-- VIEW 1: Request Access -->
-        <div id="view-request" class="flex-1 flex flex-col items-center justify-center p-8 transition-opacity duration-300">
+        <div id="view-request" class="flex-1 flex flex-col items-center justify-center p-8">
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Welcome to Local AI</h2>
-                <p class="text-slate-400">Please enter your name to request access to the host's AI engine.</p>
+                <p class="text-slate-400">Please enter your name to request access.</p>
             </div>
-            
             <div class="w-full max-w-sm">
                 <input type="text" id="guest-name" placeholder="Enter your nickname" 
-                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all placeholder-slate-500 text-white mb-4"
+                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent text-white mb-4"
                        onkeydown="if(event.key==='Enter') submitRequest()">
                 <button onclick="submitRequest()" 
-                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 text-white font-medium rounded-xl shadow-lg transition-all">
                     Request Access
                 </button>
             </div>
@@ -175,45 +121,62 @@
                 <div class="dot-flashing"></div>
             </div>
             <h2 class="text-2xl font-bold mb-2 text-white">Waiting for Approval</h2>
-            <p class="text-slate-400 text-center max-w-md">Your request has been sent to the host. Please wait while they review and approve your session.</p>
+            <p class="text-slate-400 text-center max-w-md">Please wait while the host reviews your session.</p>
         </div>
 
-        <!-- VIEW 3: Chat Room -->
-        <div id="view-chat" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full relative">
+        <!-- VIEW 3: Main App Area -->
+        <div id="view-app" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full relative">
             
-            <!-- Controls (Model / Persona / TTS) -->
-            <div class="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center gap-2 justify-between">
-                <div class="flex gap-2 text-sm">
-                    <select id="model-select" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none">
-                        <option value="llama3">Loading models...</option>
-                    </select>
-                    <select id="persona-select" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none" onchange="changePersona()">
-                        <option value="">Default Persona</option>
-                        <option value="You are a helpful coding expert. Provide concise and accurate code snippets.">Coding Expert</option>
-                        <option value="You are a warm, empathetic listener. Give thoughtful, comforting advice.">Empathetic Listener</option>
-                        <option value="You are a harsh but brilliant critic. Be very direct and sarcastic.">Sarcastic Critic</option>
-                    </select>
-                </div>
-                <button id="tts-toggle" onclick="toggleTTS()" class="text-slate-400 hover:text-white px-2 py-1 text-xs rounded border border-transparent hover:border-white/10 transition-colors" title="Toggle Auto-Speech">
-                    🔊 Auto-Speech: OFF
-                </button>
+            <!-- Channel Switcher -->
+            <div class="flex border-b border-white/10">
+                <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-3 text-sm font-medium border-b-2 border-indigo-500 text-white bg-white/5 transition-all">🔒 Private AI</button>
+                <button id="tab-public" onclick="switchTab('public')" class="flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">🌍 Public Lounge</button>
             </div>
 
-            <!-- Messages Area -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-20">
-                <!-- Welcome Message -->
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center">
-                        <span class="text-xs font-bold">AI</span>
+            <!-- PRIVATE CHAT CONTAINER -->
+            <div id="container-private" class="flex-1 flex flex-col h-full relative">
+                <!-- Controls -->
+                <div class="px-4 py-2 bg-black/20 border-b border-white/5 flex items-center justify-between">
+                    <div class="flex gap-2 text-sm">
+                        <select id="model-select" class="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none">
+                            <option value="llama3">Loading models...</option>
+                        </select>
+                        <select id="persona-select" class="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none" onchange="changePersona()">
+                            <option value="">Default Persona</option>
+                            <option value="You are a helpful coding expert. Provide concise and accurate code snippets.">Coding Expert</option>
+                            <option value="You are a warm, empathetic listener. Give thoughtful, comforting advice.">Empathetic Listener</option>
+                        </select>
                     </div>
-                    <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
-                        <div class="markdown-body text-sm text-slate-200">Hello! Your session has been approved. How can I help you today?</div>
+                    <button id="tts-toggle" onclick="toggleTTS()" class="text-slate-400 hover:text-white px-2 py-1 text-xs rounded border border-transparent hover:border-white/10 transition-colors">
+                        🔊 Auto-Speech: OFF
+                    </button>
+                </div>
+
+                <!-- Messages -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-24">
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center">
+                            <span class="text-xs font-bold">AI</span>
+                        </div>
+                        <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
+                            <div class="markdown-body text-sm text-slate-200">Hello! Your session has been approved. How can I help you today?</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="p-4 border-t border-white/10 bg-[#0f172a] absolute bottom-0 w-full">
+            <!-- PUBLIC LOUNGE CONTAINER -->
+            <div id="container-public" class="flex-1 flex flex-col h-full relative hidden">
+                <div class="px-4 py-2 bg-black/20 border-b border-white/5 text-xs text-slate-400 text-center">
+                    Welcome to the Public Lounge! Chat with others. Mention <strong>@AI</strong> to trigger the AI assistant.
+                </div>
+                <!-- Lounge Messages -->
+                <div id="lounge-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-24">
+                </div>
+            </div>
+
+            <!-- SHARED INPUT AREA -->
+            <div class="p-4 border-t border-white/10 bg-[#0f172a] absolute bottom-0 w-full z-10">
                 
                 <!-- Attachment preview -->
                 <div id="attachment-preview" class="hidden mb-2 relative inline-block">
@@ -222,26 +185,21 @@
                 </div>
 
                 <div class="relative flex items-center gap-2">
-                    
                     <!-- File Input Hidden -->
                     <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
-                    <button onclick="document.getElementById('file-input').click()" class="p-2 text-slate-400 hover:text-white transition-colors" title="Attach Image (For Vision Models)">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                    <button id="btn-attach" onclick="document.getElementById('file-input').click()" class="p-2 text-slate-400 hover:text-white transition-colors" title="Attach Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     </button>
                     
                     <button id="mic-btn" onclick="toggleSpeechRecognition()" class="p-2 text-slate-400 hover:text-red-400 transition-colors" title="Voice Input">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
                     </button>
 
                     <textarea id="chat-input" rows="1" placeholder="Type your message..." 
                               class="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:ring-1 focus:ring-accent focus:border-transparent transition-all resize-none text-sm text-white placeholder-slate-500"
-                              onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"></textarea>
+                              onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); submitMessage(); }"></textarea>
                     
-                    <button onclick="sendMessage()" id="send-btn"
+                    <button onclick="submitMessage()" id="send-btn"
                             class="absolute right-2 p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -258,42 +216,82 @@
 
     <script>
         let sessionId = null;
+        let guestName = "";
         let pollingInterval = null;
+        
+        // Private Chat
         let chatHistory = [];
         let systemPersona = "";
+        let currentMode = 'private'; // 'private' or 'public'
         
+        // Public Lounge
+        let ws = null;
+        let loungeUpdater = null; // Used for streaming AI chunks
+
+        // Voice & Attachments
         let ttsEnabled = false;
         let currentImageBase64 = null;
-        
-        // Setup Speech Recognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isRecording = false;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'zh-TW'; // Default, can be changed
-            
-            recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript;
-                const input = document.getElementById('chat-input');
-                input.value += text;
-                isRecording = false;
-                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
-                document.getElementById('mic-btn').classList.add('text-slate-400');
+            recognition.onresult = (event) => {
+                document.getElementById('chat-input').value += event.results[0][0].transcript;
+                toggleMicVisual(false);
             };
-            
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error", event.error);
-                isRecording = false;
-                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
-                document.getElementById('mic-btn').classList.add('text-slate-400');
-            };
+            recognition.onerror = () => toggleMicVisual(false);
         }
 
-        // Fetch models
+        function toggleMicVisual(active) {
+            isRecording = active;
+            const btn = document.getElementById('mic-btn');
+            if(active) {
+                btn.classList.replace('text-slate-400', 'text-red-500');
+                btn.classList.add('animate-pulse');
+            } else {
+                btn.classList.replace('text-red-500', 'text-slate-400');
+                btn.classList.remove('animate-pulse');
+            }
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) return alert("Speech recognition not supported.");
+            if (isRecording) recognition.stop();
+            else { recognition.start(); toggleMicVisual(true); }
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            document.getElementById('tts-toggle').textContent = ttsEnabled ? '🔊 Auto-Speech: ON' : '🔊 Auto-Speech: OFF';
+            document.getElementById('tts-toggle').classList.toggle('text-white', ttsEnabled);
+        }
+
+        function speakText(text) {
+            if (!ttsEnabled || !window.speechSynthesis) return;
+            const clean = text.replace(/```[\s\S]*?```/g, "Code omitted.");
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(clean));
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageBase64 = e.target.result.split(',')[1];
+                document.getElementById('img-thumb').src = e.target.result;
+                document.getElementById('attachment-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAttachment() {
+            currentImageBase64 = null;
+            document.getElementById('attachment-preview').classList.add('hidden');
+            document.getElementById('file-input').value = "";
+        }
+
         async function fetchModels() {
             try {
                 const res = await fetch('/api/models');
@@ -303,19 +301,15 @@
                     select.innerHTML = '';
                     models.forEach(m => {
                         const opt = document.createElement('option');
-                        opt.value = m;
-                        opt.textContent = m;
+                        opt.value = m; opt.textContent = m;
                         select.appendChild(opt);
                     });
                 }
-            } catch (e) {
-                console.error("Could not load models", e);
-            }
+            } catch (e) {}
         }
 
-        // UI Switching
         function showView(viewId) {
-            ['view-request', 'view-waiting', 'view-chat'].forEach(id => {
+            ['view-request', 'view-waiting', 'view-app'].forEach(id => {
                 const el = document.getElementById(id);
                 if(id === viewId) {
                     el.classList.remove('hidden');
@@ -325,24 +319,13 @@
                     el.classList.add('opacity-0');
                 }
             });
-            if (viewId === 'view-chat') {
-                document.getElementById('btn-export').classList.remove('hidden');
-                fetchModels();
-            }
+            if (viewId === 'view-app') fetchModels();
         }
 
-        function updateStatusBadge(text, colorClass) {
-            const badge = document.getElementById('status-badge');
-            badge.classList.remove('hidden');
-            badge.textContent = text;
-            badge.className = `px-3 py-1 text-xs font-medium rounded-full border ${colorClass}`;
-        }
-
-        // Request Access
         async function submitRequest() {
-            const nameInput = document.getElementById('guest-name');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('guest-name').value.trim();
             if (!name) return alert("Please enter your name.");
+            guestName = name;
             
             try {
                 const res = await fetch('/api/request_access', {
@@ -355,17 +338,11 @@
                     const data = await res.json();
                     sessionId = data.session_id;
                     showView('view-waiting');
-                    updateStatusBadge('Pending', 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300');
                     startPolling();
-                } else {
-                    alert("Failed to request access.");
                 }
-            } catch (err) {
-                alert("Error connecting to server.");
-            }
+            } catch (err) { alert("Error connecting to server."); }
         }
 
-        // Polling
         function startPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
             pollingInterval = setInterval(async () => {
@@ -376,255 +353,233 @@
                         const data = await res.json();
                         if (data.status === 'approved') {
                             clearInterval(pollingInterval);
-                            showView('view-chat');
-                            updateStatusBadge('Approved', 'bg-green-500/20 border-green-500/30 text-green-300');
-                            updateQuotaInfo(data.token_used, data.token_limit);
+                            showView('view-app');
+                            document.getElementById('status-badge').classList.remove('hidden');
+                            document.getElementById('status-badge').textContent = 'Approved';
+                            document.getElementById('btn-export').classList.remove('hidden');
+                            document.getElementById('quota-info').textContent = `Tokens: ${data.token_used} / ${data.token_limit}`;
+                            initWebSocket();
                         } else if (data.status === 'rejected') {
                             clearInterval(pollingInterval);
-                            updateStatusBadge('Rejected', 'bg-red-500/20 border-red-500/30 text-red-300');
-                            alert("Your request was rejected by the host.");
+                            alert("Request rejected.");
                             showView('view-request');
                             sessionId = null;
                         }
                     }
-                } catch (err) {
-                    console.error("Polling error", err);
-                }
+                } catch (err) {}
             }, 2000);
         }
 
-        function updateQuotaInfo(used, limit) {
-            document.getElementById('quota-info').textContent = `Tokens: ${used} / ${limit}`;
-        }
-
-        // Voice & Features
-        function toggleSpeechRecognition() {
-            if (!recognition) return alert("Your browser doesn't support speech recognition.");
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                recognition.start();
-                isRecording = true;
-                document.getElementById('mic-btn').classList.remove('text-slate-400');
-                document.getElementById('mic-btn').classList.add('text-red-500', 'animate-pulse');
-            }
-        }
-
-        function toggleTTS() {
-            ttsEnabled = !ttsEnabled;
-            document.getElementById('tts-toggle').textContent = ttsEnabled ? '🔊 Auto-Speech: ON' : '🔊 Auto-Speech: OFF';
-            document.getElementById('tts-toggle').classList.toggle('text-white', ttsEnabled);
-        }
-
-        function speakText(text) {
-            if (!ttsEnabled || !window.speechSynthesis) return;
-            const cleanText = text.replace(/```[\s\S]*?```/g, "Code block omitted from speech.");
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            // utterance.lang = 'zh-TW';
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Url = e.target.result;
-                currentImageBase64 = base64Url.split(',')[1]; // remove data:image/...;base64,
-                document.getElementById('img-thumb').src = base64Url;
-                document.getElementById('attachment-preview').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearAttachment() {
-            currentImageBase64 = null;
-            document.getElementById('attachment-preview').classList.add('hidden');
-            document.getElementById('file-input').value = "";
-        }
-
-        function changePersona() {
-            systemPersona = document.getElementById('persona-select').value;
-        }
-
-        function exportChat() {
-            let mdContent = "# AI Guest Gateway Chat Export\n\n";
-            chatHistory.forEach(msg => {
-                if (msg.role !== 'system') {
-                    mdContent += `**${msg.role === 'user' ? 'Guest' : 'AI'}**:\n${msg.content}\n\n---\n\n`;
-                }
-            });
-            const blob = new Blob([mdContent], {type: "text/markdown"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `ChatExport_${new Date().getTime()}.md`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function copyContent(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Copied to clipboard!");
-            }).catch(e => console.error("Copy failed", e));
-        }
-
-        // Chat System
-        function appendMessage(role, text) {
-            const chatContainer = document.getElementById('chat-messages');
+        // DOM Appenders
+        function appendPrivateMessage(role, text) {
+            const container = document.getElementById('chat-messages');
             const msgDiv = document.createElement('div');
             msgDiv.className = role === 'user' ? 'flex gap-4 flex-row-reverse' : 'flex gap-4 group relative';
             
-            const avatar = document.createElement('div');
-            avatar.className = role === 'user' 
-                ? 'w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center'
-                : 'w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center';
-            avatar.innerHTML = `<span class="text-xs font-bold">${role === 'user' ? 'U' : 'AI'}</span>`;
+            const avatar = `<div class="w-8 h-8 rounded-full ${role === 'user' ? 'bg-slate-700' : 'bg-gradient-to-br from-indigo-500 to-purple-500'} flex-shrink-0 flex items-center justify-center"><span class="text-xs font-bold">${role === 'user' ? 'U' : 'AI'}</span></div>`;
             
-            const content = document.createElement('div');
-            content.className = role === 'user'
-                ? 'bg-indigo-600 border border-indigo-500 rounded-2xl rounded-tr-sm p-4 max-w-[85%] overflow-hidden'
-                : 'bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%] overflow-hidden';
+            const contentCls = role === 'user' ? 'bg-indigo-600 border border-indigo-500 rounded-2xl rounded-tr-sm p-4 max-w-[85%] overflow-hidden' : 'bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%] overflow-hidden';
             
-            const p = document.createElement('div');
-            p.className = 'markdown-body text-sm text-slate-200';
+            let htmlContent = `<div class="${contentCls}"><div class="markdown-body text-sm text-slate-200">${role === 'user' ? text.replace(/\n/g, '<br>') : marked.parse(text)}</div></div>`;
             
-            if (role === 'user') {
-                p.textContent = text;
-            } else {
-                p.innerHTML = marked.parse(text);
-            }
+            msgDiv.innerHTML = role === 'user' ? htmlContent + avatar : avatar + htmlContent;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
             
-            content.appendChild(p);
-
-            // Copy button for AI
-            if (role === 'assistant') {
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = '📋';
-                copyBtn.className = 'absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white p-1';
-                copyBtn.title = "Copy message";
-                copyBtn.onclick = () => copyContent(p.getAttribute('data-raw') || text);
-                msgDiv.appendChild(copyBtn);
-            }
-
-            msgDiv.appendChild(avatar);
-            msgDiv.appendChild(content);
-            
-            chatContainer.appendChild(msgDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            
-            return { p, update: (newText) => {
-                p.setAttribute('data-raw', newText);
+            const p = msgDiv.querySelector('.markdown-body');
+            return { update: (newText) => {
                 p.innerHTML = marked.parse(newText);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                container.scrollTop = container.scrollHeight;
             }};
         }
 
-        async function sendMessage() {
+        function appendLoungeMessage(data) {
+            // data.type: user, system, ai, ai_start, ai_chunk
+            const container = document.getElementById('lounge-messages');
+            
+            if (data.type === 'system') {
+                container.innerHTML += `<div class="text-center text-xs text-slate-500 my-2">${data.content}</div>`;
+                container.scrollTop = container.scrollHeight;
+                return;
+            }
+
+            const isMe = data.name === guestName;
+            const isAI = data.name === 'AI';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isMe ? 'flex gap-4 flex-row-reverse' : 'flex gap-4';
+            
+            let bg = isMe ? 'bg-indigo-600' : 'bg-slate-800 border border-slate-700';
+            if (isAI) bg = 'bg-gradient-to-br from-indigo-900 to-purple-900 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]';
+            
+            let avatarBg = isMe ? 'bg-indigo-400' : 'bg-slate-600';
+            if (isAI) avatarBg = 'bg-gradient-to-br from-indigo-500 to-purple-500 animate-pulse';
+
+            const avatar = `<div class="w-8 h-8 rounded-full ${avatarBg} flex-shrink-0 flex items-center justify-center text-white"><span class="text-xs font-bold">${isAI ? 'AI' : data.name[0].toUpperCase()}</span></div>`;
+            
+            let htmlContent = `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]">
+                <span class="text-[10px] text-slate-400 mb-1 ml-1">${data.name}</span>
+                <div class="${bg} rounded-2xl ${isMe ? 'rounded-tr-sm' : 'rounded-tl-sm'} p-4 overflow-hidden">
+                    <div class="markdown-body text-sm text-slate-200">${isAI ? marked.parse(data.content || '') : String(data.content).replace(/\n/g, '<br>')}</div>
+                </div>
+            </div>`;
+            
+            msgDiv.innerHTML = isMe ? htmlContent + avatar : avatar + htmlContent;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            const p = msgDiv.querySelector('.markdown-body');
+            return { update: (newText) => {
+                p.innerHTML = marked.parse(newText);
+                container.scrollTop = container.scrollHeight;
+            }};
+        }
+
+        // Sending Logic
+        function submitMessage() {
             const inputEl = document.getElementById('chat-input');
-            const btnEl = document.getElementById('send-btn');
-            const message = inputEl.value.trim();
-            const selectedModel = document.getElementById('model-select').value || 'llama3';
+            const msg = inputEl.value.trim();
+            if ((!msg && !currentImageBase64) || !sessionId) return;
             
-            if ((!message && !currentImageBase64) || !sessionId) return;
-            
-            // UI setup
             inputEl.value = '';
             inputEl.style.height = 'auto';
-            btnEl.disabled = true;
-            btnEl.classList.add('opacity-50');
             
-            // Format user message
+            if (currentMode === 'private') {
+                sendPrivateMessage(msg);
+            } else {
+                if (currentImageBase64) { alert("Images are not supported in Public Lounge yet."); clearAttachment(); return; }
+                sendLoungeMessage(msg);
+            }
+        }
+
+        // Private Chat Logic
+        async function sendPrivateMessage(message) {
+            const selectedModel = document.getElementById('model-select').value || 'llama3';
+            
             let userMsgObj = { role: 'user', content: message };
             if (currentImageBase64) {
                 userMsgObj.images = [currentImageBase64];
-                appendMessage('user', "[Image Attached]\n" + message);
+                appendPrivateMessage('user', "[Image Attached]\n" + message);
             } else {
-                appendMessage('user', message);
+                appendPrivateMessage('user', message);
             }
-            
             chatHistory.push(userMsgObj);
             clearAttachment();
             
-            // Prep payload history (Inject System Persona if needed)
             let payloadMessages = [...chatHistory];
-            if (systemPersona) {
-                payloadMessages.unshift({ role: 'system', content: systemPersona });
-            }
+            if (systemPersona) payloadMessages.unshift({ role: 'system', content: systemPersona });
             
-            const aiUpdater = appendMessage('assistant', '...');
+            const aiUpdater = appendPrivateMessage('assistant', '...');
             
             try {
                 const res = await fetch('/api/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Session-ID': sessionId
-                    },
-                    body: JSON.stringify({
-                        model: selectedModel,
-                        messages: payloadMessages,
-                        stream: true
-                    })
+                    headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+                    body: JSON.stringify({ model: selectedModel, messages: payloadMessages, stream: true })
                 });
                 
-                if (!res.ok) {
-                    aiUpdater.update(res.status === 403 ? "Error: Access Denied. Quota exceeded." : `Error: HTTP ${res.status}`);
-                    btnEl.disabled = false;
-                    btnEl.classList.remove('opacity-50');
-                    return;
-                }
+                if (!res.ok) return aiUpdater.update("Error: Connection Failed.");
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder("utf-8");
-                let done = false;
                 let fullResponse = "";
 
-                while (!done) {
-                    const { value, done: readerDone } = await reader.read();
-                    done = readerDone;
-                    if (value) {
-                        const chunk = decoder.decode(value, { stream: true });
-                        const lines = chunk.split('\n');
-                        for (const line of lines) {
-                            if (line.trim() !== '') {
-                                try {
-                                    const parsed = JSON.parse(line);
-                                    if (parsed.message && parsed.message.content) {
-                                        fullResponse += parsed.message.content;
-                                        aiUpdater.update(fullResponse);
-                                    }
-                                } catch (e) { }
-                            }
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    const lines = decoder.decode(value, { stream: true }).split('\n');
+                    for (const line of lines) {
+                        if (line.trim()) {
+                            try {
+                                const p = JSON.parse(line);
+                                if (p.message?.content) {
+                                    fullResponse += p.message.content;
+                                    aiUpdater.update(fullResponse);
+                                }
+                            } catch (e) {}
                         }
                     }
                 }
-                
                 chatHistory.push({ role: 'assistant', content: fullResponse });
-                speakText(fullResponse); // TTS
-
+                speakText(fullResponse);
+                
                 // Re-check quota
-                fetch(`/api/status/${sessionId}`).then(r => r.json()).then(data => {
-                    if (data.status === 'approved') {
-                        updateQuotaInfo(data.token_used, data.token_limit);
-                    }
+                fetch(`/api/status/${sessionId}`).then(r => r.json()).then(d => {
+                    if (d.status === 'approved') document.getElementById('quota-info').textContent = `Tokens: ${d.token_used} / ${d.token_limit}`;
                 });
+            } catch (err) { aiUpdater.update("[Error]"); }
+        }
 
-            } catch (err) {
-                console.error(err);
-                aiUpdater.update("[Connection Error]");
-            } finally {
-                btnEl.disabled = false;
-                btnEl.classList.remove('opacity-50');
-                inputEl.focus();
+        // Public Lounge Logic
+        function initWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/group_chat/${sessionId}`);
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'user' || data.type === 'system' || data.type === 'ai') {
+                    // Normal complete messages
+                    appendLoungeMessage(data);
+                } 
+                else if (data.type === 'ai_start') {
+                    // AI starts streaming
+                    loungeUpdater = appendLoungeMessage({type: 'ai', name: 'AI', content: '...'});
+                    loungeUpdater.fullText = "";
+                }
+                else if (data.type === 'ai_chunk' && loungeUpdater) {
+                    loungeUpdater.fullText += data.content;
+                    loungeUpdater.update(loungeUpdater.fullText);
+                }
+                else if (data.type === 'ai_end') {
+                    if (loungeUpdater) speakText(loungeUpdater.fullText);
+                    loungeUpdater = null;
+                }
+            };
+        }
+
+        function sendLoungeMessage(message) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+            } else {
+                alert("Disconnected from Lounge.");
             }
         }
 
-        // Textarea auto-resize
+        // Tabs
+        function switchTab(mode) {
+            currentMode = mode;
+            if (mode === 'private') {
+                document.getElementById('tab-private').className = "flex-1 py-3 text-sm font-medium border-b-2 border-indigo-500 text-white bg-white/5 transition-all";
+                document.getElementById('tab-public').className = "flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all";
+                document.getElementById('container-private').classList.remove('hidden');
+                document.getElementById('container-public').classList.add('hidden');
+                document.getElementById('btn-attach').classList.remove('hidden'); // Enable attach
+            } else {
+                document.getElementById('tab-public').className = "flex-1 py-3 text-sm font-medium border-b-2 border-indigo-500 text-white bg-white/5 transition-all";
+                document.getElementById('tab-private').className = "flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all";
+                document.getElementById('container-public').classList.remove('hidden');
+                document.getElementById('container-private').classList.add('hidden');
+                document.getElementById('btn-attach').classList.add('hidden'); // Disable attach in public
+            }
+        }
+
+        function changePersona() { systemPersona = document.getElementById('persona-select').value; }
+        
+        function exportChat() {
+            let mdContent = "# AI Guest Gateway Private Chat Export\n\n";
+            chatHistory.forEach(msg => {
+                if (msg.role !== 'system') mdContent += `**${msg.role === 'user' ? 'Guest' : 'AI'}**:\n${msg.content}\n\n---\n\n`;
+            });
+            const blob = new Blob([mdContent], {type: "text/markdown"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = `Chat.md`; a.click();
+            URL.revokeObjectURL(url);
+        }
+
         document.getElementById('chat-input').addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
-            this.style.overflowY = this.scrollHeight > 150 ? 'auto' : 'hidden';
         });
     </script>
 </body>
