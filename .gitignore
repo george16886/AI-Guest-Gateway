@@ -32,3 +32,6 @@ venv.bak/
 
 # MacOS
 .DS_Store
+
+# Application Database
+database.json
