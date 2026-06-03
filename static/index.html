@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local AI Guest Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -17,8 +19,8 @@
                     colors: {
                         glass: 'rgba(255, 255, 255, 0.05)',
                         glassBorder: 'rgba(255, 255, 255, 0.1)',
-                        accent: '#6366f1', // Indigo 500
-                        accentHover: '#4f46e5', // Indigo 600
+                        accent: '#6366f1',
+                        accentHover: '#4f46e5',
                     }
                 }
             }
@@ -82,7 +84,6 @@
             50%, 100% { background-color: rgba(226, 232, 240, 0.2); }
         }
 
-        /* Custom scrollbar for chat */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -96,6 +97,33 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        /* Markdown Styles */
+        .markdown-body p { margin-bottom: 0.5em; }
+        .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body pre {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .markdown-body code {
+            font-family: monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+        }
+        .markdown-body ul { list-style-type: disc; padding-left: 20px; margin-bottom: 0.5em; }
+        .markdown-body ol { list-style-type: decimal; padding-left: 20px; margin-bottom: 0.5em; }
+        .markdown-body strong { font-weight: bold; color: #fff; }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
@@ -113,8 +141,13 @@
                 </div>
                 <h1 class="font-bold text-xl tracking-tight text-white">AI Guest Gateway</h1>
             </div>
-            <div id="status-badge" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 border border-slate-700 text-slate-300 hidden">
-                Disconnected
+            <div class="flex items-center gap-2">
+                <button id="btn-export" onclick="exportChat()" class="hidden px-3 py-1 text-xs font-medium rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/40 border border-indigo-500/30 transition-colors">
+                    Export Chat
+                </button>
+                <div id="status-badge" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 border border-slate-700 text-slate-300 hidden">
+                    Disconnected
+                </div>
             </div>
         </header>
 
@@ -146,27 +179,64 @@
         </div>
 
         <!-- VIEW 3: Chat Room -->
-        <div id="view-chat" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full">
+        <div id="view-chat" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full relative">
             
+            <!-- Controls (Model / Persona / TTS) -->
+            <div class="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center gap-2 justify-between">
+                <div class="flex gap-2 text-sm">
+                    <select id="model-select" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none">
+                        <option value="llama3">Loading models...</option>
+                    </select>
+                    <select id="persona-select" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none" onchange="changePersona()">
+                        <option value="">Default Persona</option>
+                        <option value="You are a helpful coding expert. Provide concise and accurate code snippets.">Coding Expert</option>
+                        <option value="You are a warm, empathetic listener. Give thoughtful, comforting advice.">Empathetic Listener</option>
+                        <option value="You are a harsh but brilliant critic. Be very direct and sarcastic.">Sarcastic Critic</option>
+                    </select>
+                </div>
+                <button id="tts-toggle" onclick="toggleTTS()" class="text-slate-400 hover:text-white px-2 py-1 text-xs rounded border border-transparent hover:border-white/10 transition-colors" title="Toggle Auto-Speech">
+                    🔊 Auto-Speech: OFF
+                </button>
+            </div>
+
             <!-- Messages Area -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-20">
                 <!-- Welcome Message -->
                 <div class="flex gap-4">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center">
                         <span class="text-xs font-bold">AI</span>
                     </div>
                     <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
-                        <p class="text-sm text-slate-200">Hello! Your session has been approved. How can I help you today?</p>
+                        <div class="markdown-body text-sm text-slate-200">Hello! Your session has been approved. How can I help you today?</div>
                     </div>
                 </div>
             </div>
 
             <!-- Input Area -->
-            <div class="p-4 border-t border-white/10 bg-white/5">
-                <div class="relative flex items-center">
+            <div class="p-4 border-t border-white/10 bg-[#0f172a] absolute bottom-0 w-full">
+                
+                <!-- Attachment preview -->
+                <div id="attachment-preview" class="hidden mb-2 relative inline-block">
+                    <img id="img-thumb" class="h-16 w-16 object-cover rounded border border-white/20">
+                    <button onclick="clearAttachment()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">×</button>
+                </div>
+
+                <div class="relative flex items-center gap-2">
+                    
+                    <!-- File Input Hidden -->
+                    <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                    <button onclick="document.getElementById('file-input').click()" class="p-2 text-slate-400 hover:text-white transition-colors" title="Attach Image (For Vision Models)">
+                        📎
+                    </button>
+                    
+                    <button id="mic-btn" onclick="toggleSpeechRecognition()" class="p-2 text-slate-400 hover:text-red-400 transition-colors" title="Voice Input">
+                        🎤
+                    </button>
+
                     <textarea id="chat-input" rows="1" placeholder="Type your message..." 
                               class="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:ring-1 focus:ring-accent focus:border-transparent transition-all resize-none text-sm text-white placeholder-slate-500"
                               onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"></textarea>
+                    
                     <button onclick="sendMessage()" id="send-btn"
                             class="absolute right-2 p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -186,6 +256,58 @@
         let sessionId = null;
         let pollingInterval = null;
         let chatHistory = [];
+        let systemPersona = "";
+        
+        let ttsEnabled = false;
+        let currentImageBase64 = null;
+        
+        // Setup Speech Recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isRecording = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'zh-TW'; // Default, can be changed
+            
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                const input = document.getElementById('chat-input');
+                input.value += text;
+                isRecording = false;
+                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
+                document.getElementById('mic-btn').classList.add('text-slate-400');
+            };
+            
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error", event.error);
+                isRecording = false;
+                document.getElementById('mic-btn').classList.remove('text-red-500', 'animate-pulse');
+                document.getElementById('mic-btn').classList.add('text-slate-400');
+            };
+        }
+
+        // Fetch models
+        async function fetchModels() {
+            try {
+                const res = await fetch('/api/models');
+                if (res.ok) {
+                    const models = await res.json();
+                    const select = document.getElementById('model-select');
+                    select.innerHTML = '';
+                    models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error("Could not load models", e);
+            }
+        }
 
         // UI Switching
         function showView(viewId) {
@@ -193,13 +315,16 @@
                 const el = document.getElementById(id);
                 if(id === viewId) {
                     el.classList.remove('hidden');
-                    // slight delay for transition
                     setTimeout(() => el.classList.remove('opacity-0'), 50);
                 } else {
                     el.classList.add('hidden');
                     el.classList.add('opacity-0');
                 }
             });
+            if (viewId === 'view-chat') {
+                document.getElementById('btn-export').classList.remove('hidden');
+                fetchModels();
+            }
         }
 
         function updateStatusBadge(text, colorClass) {
@@ -209,11 +334,10 @@
             badge.className = `px-3 py-1 text-xs font-medium rounded-full border ${colorClass}`;
         }
 
-        // 1. Request Access
+        // Request Access
         async function submitRequest() {
             const nameInput = document.getElementById('guest-name');
             const name = nameInput.value.trim();
-            
             if (!name) return alert("Please enter your name.");
             
             try {
@@ -237,18 +361,15 @@
             }
         }
 
-        // 2. Polling
+        // Polling
         function startPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
-            
             pollingInterval = setInterval(async () => {
                 if (!sessionId) return;
-                
                 try {
                     const res = await fetch(`/api/status/${sessionId}`);
                     if (res.ok) {
                         const data = await res.json();
-                        
                         if (data.status === 'approved') {
                             clearInterval(pollingInterval);
                             showView('view-chat');
@@ -272,11 +393,83 @@
             document.getElementById('quota-info').textContent = `Tokens: ${used} / ${limit}`;
         }
 
-        // 3. Chat System
+        // Voice & Features
+        function toggleSpeechRecognition() {
+            if (!recognition) return alert("Your browser doesn't support speech recognition.");
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+                isRecording = true;
+                document.getElementById('mic-btn').classList.remove('text-slate-400');
+                document.getElementById('mic-btn').classList.add('text-red-500', 'animate-pulse');
+            }
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            document.getElementById('tts-toggle').textContent = ttsEnabled ? '🔊 Auto-Speech: ON' : '🔊 Auto-Speech: OFF';
+            document.getElementById('tts-toggle').classList.toggle('text-white', ttsEnabled);
+        }
+
+        function speakText(text) {
+            if (!ttsEnabled || !window.speechSynthesis) return;
+            const cleanText = text.replace(/```[\s\S]*?```/g, "Code block omitted from speech.");
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            // utterance.lang = 'zh-TW';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Url = e.target.result;
+                currentImageBase64 = base64Url.split(',')[1]; // remove data:image/...;base64,
+                document.getElementById('img-thumb').src = base64Url;
+                document.getElementById('attachment-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAttachment() {
+            currentImageBase64 = null;
+            document.getElementById('attachment-preview').classList.add('hidden');
+            document.getElementById('file-input').value = "";
+        }
+
+        function changePersona() {
+            systemPersona = document.getElementById('persona-select').value;
+        }
+
+        function exportChat() {
+            let mdContent = "# AI Guest Gateway Chat Export\n\n";
+            chatHistory.forEach(msg => {
+                if (msg.role !== 'system') {
+                    mdContent += `**${msg.role === 'user' ? 'Guest' : 'AI'}**:\n${msg.content}\n\n---\n\n`;
+                }
+            });
+            const blob = new Blob([mdContent], {type: "text/markdown"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `ChatExport_${new Date().getTime()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyContent(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied to clipboard!");
+            }).catch(e => console.error("Copy failed", e));
+        }
+
+        // Chat System
         function appendMessage(role, text) {
             const chatContainer = document.getElementById('chat-messages');
             const msgDiv = document.createElement('div');
-            msgDiv.className = role === 'user' ? 'flex gap-4 flex-row-reverse' : 'flex gap-4';
+            msgDiv.className = role === 'user' ? 'flex gap-4 flex-row-reverse' : 'flex gap-4 group relative';
             
             const avatar = document.createElement('div');
             avatar.className = role === 'user' 
@@ -286,45 +479,78 @@
             
             const content = document.createElement('div');
             content.className = role === 'user'
-                ? 'bg-indigo-600 border border-indigo-500 rounded-2xl rounded-tr-sm p-4 max-w-[85%]'
-                : 'bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]';
+                ? 'bg-indigo-600 border border-indigo-500 rounded-2xl rounded-tr-sm p-4 max-w-[85%] overflow-hidden'
+                : 'bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%] overflow-hidden';
             
-            const p = document.createElement('p');
-            p.className = 'text-sm text-slate-200 whitespace-pre-wrap';
-            p.textContent = text;
+            const p = document.createElement('div');
+            p.className = 'markdown-body text-sm text-slate-200';
+            
+            if (role === 'user') {
+                p.textContent = text;
+            } else {
+                p.innerHTML = marked.parse(text);
+            }
             
             content.appendChild(p);
+
+            // Copy button for AI
+            if (role === 'assistant') {
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = '📋';
+                copyBtn.className = 'absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white p-1';
+                copyBtn.title = "Copy message";
+                copyBtn.onclick = () => copyContent(p.getAttribute('data-raw') || text);
+                msgDiv.appendChild(copyBtn);
+            }
+
             msgDiv.appendChild(avatar);
             msgDiv.appendChild(content);
             
             chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             
-            return p; // Return the p element to allow streaming updates
+            return { p, update: (newText) => {
+                p.setAttribute('data-raw', newText);
+                p.innerHTML = marked.parse(newText);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }};
         }
 
         async function sendMessage() {
             const inputEl = document.getElementById('chat-input');
             const btnEl = document.getElementById('send-btn');
             const message = inputEl.value.trim();
+            const selectedModel = document.getElementById('model-select').value || 'llama3';
             
-            if (!message || !sessionId) return;
+            if ((!message && !currentImageBase64) || !sessionId) return;
             
-            // UI setup for sending
+            // UI setup
             inputEl.value = '';
-            inputEl.style.height = 'auto'; // reset textarea height
+            inputEl.style.height = 'auto';
             btnEl.disabled = true;
             btnEl.classList.add('opacity-50');
             
-            // Store user message
-            chatHistory.push({ role: 'user', content: message });
-            appendMessage('user', message);
+            // Format user message
+            let userMsgObj = { role: 'user', content: message };
+            if (currentImageBase64) {
+                userMsgObj.images = [currentImageBase64];
+                appendMessage('user', "[Image Attached]\n" + message);
+            } else {
+                appendMessage('user', message);
+            }
             
-            // Create AI message placeholder
-            const aiTextElement = appendMessage('assistant', '');
+            chatHistory.push(userMsgObj);
+            clearAttachment();
+            
+            // Prep payload history (Inject System Persona if needed)
+            let payloadMessages = [...chatHistory];
+            if (systemPersona) {
+                payloadMessages.unshift({ role: 'system', content: systemPersona });
+            }
+            
+            const aiUpdater = appendMessage('assistant', '...');
             
             try {
-                // Send Request
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
@@ -332,24 +558,19 @@
                         'X-Session-ID': sessionId
                     },
                     body: JSON.stringify({
-                        model: 'llama3', // Default model, adjustable later
-                        messages: chatHistory,
+                        model: selectedModel,
+                        messages: payloadMessages,
                         stream: true
                     })
                 });
                 
                 if (!res.ok) {
-                    if (res.status === 403) {
-                        aiTextElement.textContent = "Error: Access Denied. Quota exceeded or session expired.";
-                    } else {
-                        aiTextElement.textContent = `Error: HTTP ${res.status}`;
-                    }
+                    aiUpdater.update(res.status === 403 ? "Error: Access Denied. Quota exceeded." : `Error: HTTP ${res.status}`);
                     btnEl.disabled = false;
                     btnEl.classList.remove('opacity-50');
                     return;
                 }
 
-                // Handle SSE Stream
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder("utf-8");
                 let done = false;
@@ -360,7 +581,6 @@
                     done = readerDone;
                     if (value) {
                         const chunk = decoder.decode(value, { stream: true });
-                        // Ollama yields NDJSON. We split by newline and parse
                         const lines = chunk.split('\n');
                         for (const line of lines) {
                             if (line.trim() !== '') {
@@ -368,23 +588,18 @@
                                     const parsed = JSON.parse(line);
                                     if (parsed.message && parsed.message.content) {
                                         fullResponse += parsed.message.content;
-                                        aiTextElement.textContent = fullResponse;
-                                        // Scroll to bottom
-                                        const chatContainer = document.getElementById('chat-messages');
-                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                        aiUpdater.update(fullResponse);
                                     }
-                                } catch (e) {
-                                    console.error("Error parsing JSON chunk:", e, line);
-                                }
+                                } catch (e) { }
                             }
                         }
                     }
                 }
                 
-                // Add AI response to history
                 chatHistory.push({ role: 'assistant', content: fullResponse });
-                
-                // Re-check quota by getting status
+                speakText(fullResponse); // TTS
+
+                // Re-check quota
                 fetch(`/api/status/${sessionId}`).then(r => r.json()).then(data => {
                     if (data.status === 'approved') {
                         updateQuotaInfo(data.token_used, data.token_limit);
@@ -393,7 +608,7 @@
 
             } catch (err) {
                 console.error(err);
-                aiTextElement.textContent += "\n[Connection Error]";
+                aiUpdater.update("[Connection Error]");
             } finally {
                 btnEl.disabled = false;
                 btnEl.classList.remove('opacity-50');
@@ -402,15 +617,10 @@
         }
 
         // Textarea auto-resize
-        const textarea = document.getElementById('chat-input');
-        textarea.addEventListener('input', function() {
+        document.getElementById('chat-input').addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
-            if(this.scrollHeight > 150) {
-                this.style.overflowY = 'auto';
-            } else {
-                this.style.overflowY = 'hidden';
-            }
+            this.style.overflowY = this.scrollHeight > 150 ? 'auto' : 'hidden';
         });
     </script>
 </body>
