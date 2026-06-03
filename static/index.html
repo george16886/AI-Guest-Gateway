@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Guest Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                        accent: '#6366f1', // Indigo 500
+                        accentHover: '#4f46e5', // Indigo 600
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: var(--tw-colors-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--tw-colors-glassBorder);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .dot-flashing {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #e2e8f0;
+            color: #e2e8f0;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: 0.5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #e2e8f0;
+            color: #e2e8f0;
+            animation: dot-flashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #e2e8f0;
+            color: #e2e8f0;
+            animation: dot-flashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+
+        @keyframes dot-flashing {
+            0% { background-color: #e2e8f0; }
+            50%, 100% { background-color: rgba(226, 232, 240, 0.2); }
+        }
+
+        /* Custom scrollbar for chat */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <!-- Container -->
+    <div class="w-full max-w-4xl h-[85vh] glass-panel rounded-2xl flex flex-col relative overflow-hidden transition-all duration-500">
+        
+        <!-- Header -->
+        <header class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                </div>
+                <h1 class="font-bold text-xl tracking-tight text-white">AI Guest Gateway</h1>
+            </div>
+            <div id="status-badge" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 border border-slate-700 text-slate-300 hidden">
+                Disconnected
+            </div>
+        </header>
+
+        <!-- VIEW 1: Request Access -->
+        <div id="view-request" class="flex-1 flex flex-col items-center justify-center p-8 transition-opacity duration-300">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Welcome to Local AI</h2>
+                <p class="text-slate-400">Please enter your name to request access to the host's AI engine.</p>
+            </div>
+            
+            <div class="w-full max-w-sm">
+                <input type="text" id="guest-name" placeholder="Enter your nickname" 
+                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all placeholder-slate-500 text-white mb-4"
+                       onkeydown="if(event.key==='Enter') submitRequest()">
+                <button onclick="submitRequest()" 
+                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                    Request Access
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Waiting Room -->
+        <div id="view-waiting" class="flex-1 flex flex-col items-center justify-center p-8 hidden opacity-0 transition-opacity duration-300">
+            <div class="w-20 h-20 mb-8 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                <div class="dot-flashing"></div>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Waiting for Approval</h2>
+            <p class="text-slate-400 text-center max-w-md">Your request has been sent to the host. Please wait while they review and approve your session.</p>
+        </div>
+
+        <!-- VIEW 3: Chat Room -->
+        <div id="view-chat" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full">
+            
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
+                <!-- Welcome Message -->
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center">
+                        <span class="text-xs font-bold">AI</span>
+                    </div>
+                    <div class="bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
+                        <p class="text-sm text-slate-200">Hello! Your session has been approved. How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-white/10 bg-white/5">
+                <div class="relative flex items-center">
+                    <textarea id="chat-input" rows="1" placeholder="Type your message..." 
+                              class="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:ring-1 focus:ring-accent focus:border-transparent transition-all resize-none text-sm text-white placeholder-slate-500"
+                              onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"></textarea>
+                    <button onclick="sendMessage()" id="send-btn"
+                            class="absolute right-2 p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-2 flex justify-between px-1">
+                    <span class="text-[10px] text-slate-500">Shift + Enter for new line</span>
+                    <span id="quota-info" class="text-[10px] text-slate-500">Tokens: - / -</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let pollingInterval = null;
+        let chatHistory = [];
+
+        // UI Switching
+        function showView(viewId) {
+            ['view-request', 'view-waiting', 'view-chat'].forEach(id => {
+                const el = document.getElementById(id);
+                if(id === viewId) {
+                    el.classList.remove('hidden');
+                    // slight delay for transition
+                    setTimeout(() => el.classList.remove('opacity-0'), 50);
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.add('opacity-0');
+                }
+            });
+        }
+
+        function updateStatusBadge(text, colorClass) {
+            const badge = document.getElementById('status-badge');
+            badge.classList.remove('hidden');
+            badge.textContent = text;
+            badge.className = `px-3 py-1 text-xs font-medium rounded-full border ${colorClass}`;
+        }
+
+        // 1. Request Access
+        async function submitRequest() {
+            const nameInput = document.getElementById('guest-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) return alert("Please enter your name.");
+            
+            try {
+                const res = await fetch('/api/request_access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ guest_name: name })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    sessionId = data.session_id;
+                    showView('view-waiting');
+                    updateStatusBadge('Pending', 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300');
+                    startPolling();
+                } else {
+                    alert("Failed to request access.");
+                }
+            } catch (err) {
+                alert("Error connecting to server.");
+            }
+        }
+
+        // 2. Polling
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            
+            pollingInterval = setInterval(async () => {
+                if (!sessionId) return;
+                
+                try {
+                    const res = await fetch(`/api/status/${sessionId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        
+                        if (data.status === 'approved') {
+                            clearInterval(pollingInterval);
+                            showView('view-chat');
+                            updateStatusBadge('Approved', 'bg-green-500/20 border-green-500/30 text-green-300');
+                            updateQuotaInfo(data.token_used, data.token_limit);
+                        } else if (data.status === 'rejected') {
+                            clearInterval(pollingInterval);
+                            updateStatusBadge('Rejected', 'bg-red-500/20 border-red-500/30 text-red-300');
+                            alert("Your request was rejected by the host.");
+                            showView('view-request');
+                            sessionId = null;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Polling error", err);
+                }
+            }, 2000);
+        }
+
+        function updateQuotaInfo(used, limit) {
+            document.getElementById('quota-info').textContent = `Tokens: ${used} / ${limit}`;
+        }
+
+        // 3. Chat System
+        function appendMessage(role, text) {
+            const chatContainer = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = role === 'user' ? 'flex gap-4 flex-row-reverse' : 'flex gap-4';
+            
+            const avatar = document.createElement('div');
+            avatar.className = role === 'user' 
+                ? 'w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center'
+                : 'w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center';
+            avatar.innerHTML = `<span class="text-xs font-bold">${role === 'user' ? 'U' : 'AI'}</span>`;
+            
+            const content = document.createElement('div');
+            content.className = role === 'user'
+                ? 'bg-indigo-600 border border-indigo-500 rounded-2xl rounded-tr-sm p-4 max-w-[85%]'
+                : 'bg-white/10 border border-white/10 rounded-2xl rounded-tl-sm p-4 max-w-[85%]';
+            
+            const p = document.createElement('p');
+            p.className = 'text-sm text-slate-200 whitespace-pre-wrap';
+            p.textContent = text;
+            
+            content.appendChild(p);
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(content);
+            
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return p; // Return the p element to allow streaming updates
+        }
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const btnEl = document.getElementById('send-btn');
+            const message = inputEl.value.trim();
+            
+            if (!message || !sessionId) return;
+            
+            // UI setup for sending
+            inputEl.value = '';
+            inputEl.style.height = 'auto'; // reset textarea height
+            btnEl.disabled = true;
+            btnEl.classList.add('opacity-50');
+            
+            // Store user message
+            chatHistory.push({ role: 'user', content: message });
+            appendMessage('user', message);
+            
+            // Create AI message placeholder
+            const aiTextElement = appendMessage('assistant', '');
+            
+            try {
+                // Send Request
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': sessionId
+                    },
+                    body: JSON.stringify({
+                        model: 'llama3', // Default model, adjustable later
+                        messages: chatHistory,
+                        stream: true
+                    })
+                });
+                
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        aiTextElement.textContent = "Error: Access Denied. Quota exceeded or session expired.";
+                    } else {
+                        aiTextElement.textContent = `Error: HTTP ${res.status}`;
+                    }
+                    btnEl.disabled = false;
+                    btnEl.classList.remove('opacity-50');
+                    return;
+                }
+
+                // Handle SSE Stream
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let done = false;
+                let fullResponse = "";
+
+                while (!done) {
+                    const { value, done: readerDone } = await reader.read();
+                    done = readerDone;
+                    if (value) {
+                        const chunk = decoder.decode(value, { stream: true });
+                        // Ollama yields NDJSON. We split by newline and parse
+                        const lines = chunk.split('\n');
+                        for (const line of lines) {
+                            if (line.trim() !== '') {
+                                try {
+                                    const parsed = JSON.parse(line);
+                                    if (parsed.message && parsed.message.content) {
+                                        fullResponse += parsed.message.content;
+                                        aiTextElement.textContent = fullResponse;
+                                        // Scroll to bottom
+                                        const chatContainer = document.getElementById('chat-messages');
+                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    console.error("Error parsing JSON chunk:", e, line);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Add AI response to history
+                chatHistory.push({ role: 'assistant', content: fullResponse });
+                
+                // Re-check quota by getting status
+                fetch(`/api/status/${sessionId}`).then(r => r.json()).then(data => {
+                    if (data.status === 'approved') {
+                        updateQuotaInfo(data.token_used, data.token_limit);
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+                aiTextElement.textContent += "\n[Connection Error]";
+            } finally {
+                btnEl.disabled = false;
+                btnEl.classList.remove('opacity-50');
+                inputEl.focus();
+            }
+        }
+
+        // Textarea auto-resize
+        const textarea = document.getElementById('chat-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.scrollHeight > 150) {
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+    </script>
+</body>
+</html>
