@@ -6,30 +6,23 @@ echo.
 
 rem Check for Python
 python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Python is not installed or not in PATH!
-    echo Please install Python from https://www.python.org/ and check "Add Python to PATH".
-    pause
-    exit /b
-)
+if errorlevel 1 goto nopython
 
-rem Create virtual environment if it does not exist
-if not exist "env\Scripts\activate.bat" (
-    echo [1/3] Creating virtual environment (env)...
-    python -m venv env
-) else (
-    echo [1/3] Virtual environment found.
-)
+rem Check virtual environment
+if exist "env\Scripts\activate.bat" goto hasenv
 
-rem Activate virtual environment and install requirements
+echo [1/3] Creating virtual environment (env)...
+python -m venv env
+goto startinstall
+
+:hasenv
+echo [1/3] Virtual environment found.
+
+:startinstall
 echo [2/3] Installing/updating requirements...
 call env\Scripts\activate.bat
 pip install -r requirements.txt
-if %errorlevel% neq 0 (
-    echo [WARNING] Some errors occurred during package installation.
-)
 
-rem Start applications
 echo [3/3] Starting services...
 echo.
 echo Starting FastAPI Backend in a new window...
@@ -41,3 +34,10 @@ echo.
 streamlit run dashboard.py
 
 pause
+exit /b
+
+:nopython
+echo [ERROR] Python is not installed or not in PATH!
+echo Please install Python from https://www.python.org/ and check "Add Python to PATH".
+pause
+exit /b
