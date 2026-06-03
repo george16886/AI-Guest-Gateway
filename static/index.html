@@ -127,7 +127,7 @@
                 <h1 class="font-bold text-xl tracking-tight text-white">AI Guest Gateway</h1>
             </div>
             <div class="flex items-center gap-2">
-                <select id="theme-select" onchange="changeTheme()" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-slate-300 text-xs outline-none">
+                <select id="theme-select" onchange="changeTheme()" class="bg-slate-800 border border-white/10 rounded-lg px-2 py-1 text-slate-300 text-xs outline-none">
                     <option value="default">Ocean Blue Theme</option>
                     <option value="cyberpunk">Cyberpunk Theme</option>
                     <option value="forest">Dark Forest Theme</option>
@@ -169,30 +169,30 @@
         </div>
 
         <!-- VIEW 3: Main App Area -->
-        <div id="view-app" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 h-full relative">
+        <div id="view-app" class="flex-1 flex flex-col hidden opacity-0 transition-opacity duration-300 min-h-0">
             
             <!-- Channel Switcher -->
-            <div class="flex border-b border-white/10">
+            <div class="flex border-b border-white/10 shrink-0">
                 <button id="tab-private" onclick="switchTab('private')" class="flex-1 py-3 text-sm font-medium border-b-2 border-primary text-white bg-white/5 transition-all">🔒 Private AI</button>
                 <button id="tab-public" onclick="switchTab('public')" class="flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">🌍 Public Lounge</button>
             </div>
 
             <!-- PRIVATE CHAT CONTAINER -->
-            <div id="container-private" class="flex-1 flex flex-col h-full relative">
+            <div id="container-private" class="flex-1 flex flex-col min-h-0">
                 <!-- Controls -->
                 <div class="px-4 py-2 bg-black/20 border-b border-white/5 flex items-center justify-between">
                     <div class="flex gap-2 text-sm">
-                        <select id="model-select" class="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none">
+                        <select id="model-select" class="bg-slate-800 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none">
                             <option value="llama3">Loading models...</option>
                         </select>
-                        <select id="persona-select" class="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none max-w-[150px] truncate" onchange="changePersona()">
+                        <select id="persona-select" class="bg-slate-800 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none max-w-[150px] truncate" onchange="changePersona()">
                             <option value="">Default Persona</option>
                             <option value="You are a helpful coding expert. Provide concise and accurate code snippets.">Coding Expert</option>
                             <option value="You are a harsh but brilliant critic. Be very direct and sarcastic.">Sarcastic Critic</option>
                             <option value="You are a wise philosopher. Answer questions with deep philosophical insights.">Philosopher</option>
                             <option value="custom">✍️ Custom Persona...</option>
                         </select>
-                        <input type="text" id="custom-persona-input" placeholder="Type system prompt here..." class="hidden bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none w-48 text-xs" onblur="updateCustomPersona()">
+                        <input type="text" id="custom-persona-input" placeholder="Type system prompt here..." class="hidden bg-slate-800 border border-white/10 rounded-lg px-2 py-1 text-slate-300 outline-none w-48 text-xs" onblur="updateCustomPersona()">
                     </div>
                     <button id="tts-toggle" onclick="toggleTTS()" class="text-slate-400 hover:text-white px-2 py-1 text-xs rounded border border-transparent hover:border-white/10 transition-colors">
                         🔊 Auto-Speech: OFF
@@ -200,7 +200,7 @@
                 </div>
 
                 <!-- Messages -->
-                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-24">
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gradFrom to-gradTo flex-shrink-0 flex items-center justify-center">
                             <span class="text-xs font-bold">AI</span>
@@ -213,17 +213,17 @@
             </div>
 
             <!-- PUBLIC LOUNGE CONTAINER -->
-            <div id="container-public" class="flex-1 flex flex-col h-full relative hidden">
-                <div class="px-4 py-2 bg-black/20 border-b border-white/5 text-xs text-slate-400 text-center">
+            <div id="container-public" class="flex-1 flex flex-col min-h-0 hidden">
+                <div class="px-4 py-2 bg-black/20 border-b border-white/5 text-xs text-slate-400 text-center shrink-0">
                     Welcome to the Public Lounge! Chat with others. Mention <strong>@AI</strong> to trigger the AI assistant.
                 </div>
                 <!-- Lounge Messages -->
-                <div id="lounge-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 pb-24">
+                <div id="lounge-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
                 </div>
             </div>
 
             <!-- SHARED INPUT AREA -->
-            <div class="p-4 border-t border-white/10 bg-[#0f172a] absolute bottom-0 w-full z-10">
+            <div class="p-4 border-t border-white/10 bg-[#0f172a] shrink-0 w-full z-10">
                 
                 <!-- Attachment preview -->
                 <div id="attachment-preview" class="hidden mb-2 relative inline-block">
@@ -248,8 +248,8 @@
                     
                     <button onclick="submitMessage()" id="send-btn"
                             class="absolute right-2 p-2 rounded-lg bg-primary hover:bg-primaryHover text-white transition-colors disabled:opacity-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                         </svg>
                     </button>
                 </div>
